@@ -10,8 +10,8 @@
 ## 🌟 Overview & Functions
 
 **Prompt Optimizer** is a full-stack, editorial-style workspace designed to bridge the gap between vague, natural language software requests and high-clarity, context-aware prompt specifications for modern AI coding agents.
-
-<img width="674" height="391" alt="Screenshot 2026-07-24 142718" src="https://github.com/user-attachments/assets/48457bbf-d8ec-4c44-a365-43496272d1bd" /> <img width="535" height="547" alt="Screenshot 2026-07-24 142725" src="https://github.com/user-attachments/assets/a70b7235-64b6-4095-9ba2-f79f086f591c" />
+**Prompt Templating** for specific tasks and target environments.
+<img width="300" height="200" alt="Screenshot 2026-07-24 142718" src="https://github.com/user-attachments/assets/48457bbf-d8ec-4c44-a365-43496272d1bd" /> <img width="300" height="200" alt="Screenshot 2026-07-24 142725" src="https://github.com/user-attachments/assets/a70b7235-64b6-4095-9ba2-f79f086f591c" />
 
 
 
