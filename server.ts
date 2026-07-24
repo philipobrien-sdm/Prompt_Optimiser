@@ -186,6 +186,11 @@ app.post('/api/llm/analyze-prompt', async (req, res) => {
   const systemPrompt = settings?.systemPrompt || 'You are Prompt Optimizer...';
   const style = settings?.promptStyle || 'google_ai_studio';
 
+  const activeReqInstructions = (req.body.activeRequirements || []) as string[];
+  const reqsText = activeReqInstructions.length > 0 
+    ? `\n\n[MANDATORY APP ARCHITECTURAL REQUIREMENTS (TOGGLED ON BY USER)]\n${activeReqInstructions.map((r: string, i: number) => `${i + 1}. ${r}`).join('\n')}`
+    : '';
+
   const pipelineInstruction = `${systemPrompt}
 
 You must process the user's software request through the following 5 stages:
@@ -201,7 +206,7 @@ Project Context:
 - Current Goals: ${(projectContext?.currentGoals || []).join('; ')}
 - Known Constraints: ${(projectContext?.knownConstraints || []).join('; ')}
 - Recent Features: ${(projectContext?.recentFeatures || []).join('; ')}
-- Key Decisions: ${(projectContext?.keyDecisions || []).join('; ')}
+- Key Decisions: ${(projectContext?.keyDecisions || []).join('; ')}${reqsText}
 
 User Request:
 "${rawPrompt.trim()}"

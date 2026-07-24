@@ -66,6 +66,15 @@ export interface PromptLogItem {
   accepted?: boolean;
 }
 
+export interface AppRequirementItem {
+  id: string;
+  name: string;
+  category: 'Persistence' | 'Connectivity' | 'Error Handling' | 'State & Cache' | 'Architecture & Types';
+  description: string;
+  promptInstruction: string;
+  defaultEnabled: boolean;
+}
+
 export interface AppSettings {
   llmProvider: LLMProvider;
   localEndpoint: string;
@@ -78,4 +87,5 @@ export interface AppSettings {
   functionalSpecPrompt: string;
   exportPath: string;
   autoSave: boolean;
+  activeRequirementIds: string[];
 }

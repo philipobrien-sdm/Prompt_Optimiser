@@ -30,6 +30,7 @@ import {
   loadPromptHistory, 
   savePromptHistory 
 } from './lib/storage';
+import { DEFAULT_APP_REQUIREMENTS } from './lib/defaults';
 
 export default function App() {
   // Application State
@@ -133,6 +134,10 @@ export default function App() {
     setCurrentAnalysis(null);
 
     try {
+      const activeRequirementInstructions = DEFAULT_APP_REQUIREMENTS
+        .filter((r) => (settings.activeRequirementIds || []).includes(r.id))
+        .map((r) => r.promptInstruction);
+
       const res = await fetch('/api/llm/analyze-prompt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -140,6 +145,7 @@ export default function App() {
           rawPrompt: rawPrompt.trim(),
           projectContext: activeProject.context,
           settings,
+          activeRequirements: activeRequirementInstructions,
         }),
       });
 
@@ -301,6 +307,58 @@ export default function App() {
     addToast('success', 'Context Synchronized', 'Added prompt assumptions to project key decisions.');
   };
 
+  // Export session JSON
+  const handleExportSessionJSON = () => {
+    const sessionData = {
+      version: '1.0',
+      timestamp: new Date().toISOString(),
+      activeProjectId,
+      projects,
+      settings,
+      history,
+    };
+    const jsonStr = JSON.stringify(sessionData, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `prompt-optimizer-session-${activeProject.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    addToast('success', 'Session Exported', 'Downloaded complete workspace session as JSON file.');
+  };
+
+  // Import session JSON
+  const handleImportSessionJSON = (json: any) => {
+    try {
+      if (json.projects && Array.isArray(json.projects)) {
+        setProjects(json.projects);
+        saveStoredProjects(json.projects);
+      }
+      if (json.settings) {
+        setSettings(json.settings);
+        saveStoredSettings(json.settings);
+      }
+      if (json.activeProjectId) {
+        setActiveProjectId(json.activeProjectId);
+        saveActiveProjectId(json.activeProjectId);
+      }
+      if (json.history && Array.isArray(json.history) && json.activeProjectId) {
+        setHistory(json.history);
+        savePromptHistory(json.activeProjectId, json.history);
+      }
+      addToast('success', 'Session Imported', 'Restored workspace session from JSON file.');
+    } catch (err: any) {
+      addToast('error', 'Import Failed', 'Invalid session JSON format.');
+    }
+  };
+
+  // Clear app cache / reset blank slate
+  const handleClearAppCache = () => {
+    localStorage.clear();
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen bg-[#F9F8F6] text-[#1A1A1A] flex flex-col font-sans selection:bg-[#A04A30] selection:text-white">
       {/* Top Header */}
@@ -383,10 +441,13 @@ export default function App() {
             setSettings(newSettings);
             saveStoredSettings(newSettings);
             handlePingLLM(newSettings);
-            addToast('success', 'Settings Saved', `LLM provider set to ${newSettings.llmProvider}`);
+            addToast('success', 'Settings Saved', `Updated configuration with ${newSettings.activeRequirementIds?.length || 0} active requirement rules.`);
           }}
           onClose={() => setSettingsOpen(false)}
           onPing={handlePingLLM}
+          onExportSessionJSON={handleExportSessionJSON}
+          onImportSessionJSON={handleImportSessionJSON}
+          onClearAppCache={handleClearAppCache}
         />
       )}
 

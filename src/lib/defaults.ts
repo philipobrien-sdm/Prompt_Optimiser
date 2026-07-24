@@ -1,4 +1,79 @@
-import { AppSettings, Project, PromptStyle } from '../types';
+import { AppSettings, Project, PromptStyle, AppRequirementItem } from '../types';
+
+export const DEFAULT_APP_REQUIREMENTS: AppRequirementItem[] = [
+  {
+    id: 'session_json_export_import',
+    name: 'Saving & Loading App Sessions via JSON',
+    category: 'Persistence',
+    description: 'Export and restore entire app state, prompt history, and settings to/from structured .json files.',
+    promptInstruction: 'Implement full session import and export capability using structured JSON files with schema validation upon loading.',
+    defaultEnabled: true,
+  },
+  {
+    id: 'local_llm_connectivity',
+    name: 'Connectivity to Local LLMs (LM Studio / Ollama)',
+    category: 'Connectivity',
+    description: 'Support local REST LLM endpoints on localhost:1234 or custom base URLs with ping testing.',
+    promptInstruction: 'Ensure full compatibility with local OpenAI-compatible REST LLM endpoints (LM Studio / Ollama on port 1234) with ping healthchecks.',
+    defaultEnabled: true,
+  },
+  {
+    id: 'clear_app_cache',
+    name: 'Clearing App Cache (Blank Slate Reset)',
+    category: 'State & Cache',
+    description: 'Provide an active hard reset action to clear cached state and restore pristine defaults.',
+    promptInstruction: 'Include an explicit "Reset / Clear App Cache" mechanism to wipe cached browser state and restore clean initial defaults upon confirmation.',
+    defaultEnabled: true,
+  },
+  {
+    id: 'input_error_handling',
+    name: 'Input Error Handling & Form Validation',
+    category: 'Error Handling',
+    description: 'Validate text inputs, check for empty or invalid strings, and display clear visual error messages.',
+    promptInstruction: 'Implement robust frontend input validation, trimming empty user input, verifying length bounds, and providing accessible error feedback.',
+    defaultEnabled: true,
+  },
+  {
+    id: 'json_parse_handling',
+    name: 'JSON Parse Error Safeguards & Regex Extraction',
+    category: 'Error Handling',
+    description: 'Safely parse JSON responses using try-catch blocks and fallback markdown codeblock extractors.',
+    promptInstruction: 'Guard all JSON parsing operations with try-catch blocks, regex extraction for markdown codeblocks (```json), and safe fallbacks.',
+    defaultEnabled: true,
+  },
+  {
+    id: 'llm_failure_retry_handling',
+    name: 'LLM Call Failure & Timeout Retry Handling',
+    category: 'Error Handling',
+    description: 'Detect timeouts, handle API failures gracefully, and provide deterministic offline fallback.',
+    promptInstruction: 'Implement network timeout abortion, automatic retry handlers, and graceful deterministic fallback if LLM endpoints fail or rate-limit.',
+    defaultEnabled: true,
+  },
+  {
+    id: 'typescript_type_safety',
+    name: 'TypeScript Strict Type Safety & Clean Interfaces',
+    category: 'Architecture & Types',
+    description: 'Enforce strict TypeScript types, explicit interface definitions, and zero implicit any.',
+    promptInstruction: 'Maintain strict TypeScript type safety, explicit interface declarations in src/types.ts, and guard against undefined property access.',
+    defaultEnabled: true,
+  },
+  {
+    id: 'responsive_layout_rules',
+    name: 'Responsive Mobile-First Layout & Touch Targets',
+    category: 'Architecture & Types',
+    description: 'Ensure 44px+ touch targets, fluid flex/grid layouts, and responsive panel stacking.',
+    promptInstruction: 'Adhere to mobile-first responsive Tailwind layouts, minimum 44px touch targets on controls, and fluid container overflow handling.',
+    defaultEnabled: true,
+  },
+  {
+    id: 'offline_fallback_mode',
+    name: 'Offline Network Degraded Fallback Engine',
+    category: 'Connectivity',
+    description: 'Detect offline status and offer local deterministic prompt processing when disconnected.',
+    promptInstruction: 'Provide an offline fallback mode that uses local browser storage and rule-based processing when internet or remote LLM server is unreachable.',
+    defaultEnabled: true,
+  },
+];
 
 export const DEFAULT_SYSTEM_PROMPT = `You are Prompt Optimizer, an expert prompt engineering assistant for AI coding tools (such as Google AI Studio, Gemini, Claude Code, Cursor, Copilot).
 
@@ -36,6 +111,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   functionalSpecPrompt: DEFAULT_FUNCTIONAL_SPEC_PROMPT,
   exportPath: './exports',
   autoSave: true,
+  activeRequirementIds: DEFAULT_APP_REQUIREMENTS.map((r) => r.id),
 };
 
 export const INITIAL_PROJECT: Project = {

@@ -1,19 +1,12 @@
 # Prompt Optimizer
 
-> AI driven prompt compiler and session workspace that transforms informal user requests into structured, implementation-ready prompts for AI coding assistants.
-
-<img width="1899" height="894" alt="Screenshot 2026-07-24 142234" src="https://github.com/user-attachments/assets/29a68eb3-952d-4f31-8b79-0e41419a8406" />
-
+> Deterministic prompt compiler and session workspace that transforms informal user requests into structured, implementation-ready prompts for AI coding assistants.
 
 ---
 
 ## 🌟 Overview & Functions
 
 **Prompt Optimizer** is a full-stack, editorial-style workspace designed to bridge the gap between vague, natural language software requests and high-clarity, context-aware prompt specifications for modern AI coding agents.
-
-<img width="400" height="300" alt="Screenshot 2026-07-24 142718" src="https://github.com/user-attachments/assets/48457bbf-d8ec-4c44-a365-43496272d1bd" /> <img width="400" height="300" alt="Screenshot 2026-07-24 142725" src="https://github.com/user-attachments/assets/a70b7235-64b6-4095-9ba2-f79f086f591c" />
-
-
 
 ### Key Functional Capabilities
 
@@ -35,16 +28,10 @@
 4. **Functional Specification (`functional.md`) Generator**:
    - Compiles session prompt history and architectural decisions into a standardized, complete functional specification markdown document.
    - One-click file saving directly to the workspace server disk or local browser download.
-  
-   <img width="873" height="718" alt="Screenshot 2026-07-24 142315" src="https://github.com/user-attachments/assets/5187a256-2c84-44e3-833d-3951d7e74ecb" />
-
 
 5. **Local & Cloud Model Engine Switching**:
    - Seamlessly toggle between Google AI Studio server-side Gemini endpoints and local OpenAI-compatible REST endpoints (e.g., LM Studio or Ollama running on `localhost:1234`).
    - Ping & connection testing utility to verify endpoint availability before running queries.
-
-   <img width="652" height="608" alt="Screenshot 2026-07-24 142249" src="https://github.com/user-attachments/assets/9e613193-e0b4-434a-bab0-7229bb0c267e" />
-
 
 6. **Historical Archive Log**:
    - Persistent prompt logs allowing session retrieval, search, one-click reload into editor, and comparative review.

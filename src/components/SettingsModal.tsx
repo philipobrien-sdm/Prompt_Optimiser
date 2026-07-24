@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   X, 
   Save, 
@@ -10,16 +10,25 @@ import {
   CheckCircle2, 
   AlertCircle, 
   RefreshCw,
-  Server
+  Server,
+  Layers,
+  Download,
+  Upload,
+  Trash2,
+  CheckSquare,
+  Square
 } from 'lucide-react';
 import { AppSettings, LLMProvider, PromptStyle } from '../types';
-import { DEFAULT_SETTINGS, PROMPT_STYLE_DESCRIPTIONS } from '../lib/defaults';
+import { DEFAULT_SETTINGS, PROMPT_STYLE_DESCRIPTIONS, DEFAULT_APP_REQUIREMENTS } from '../lib/defaults';
 
 interface SettingsModalProps {
   settings: AppSettings;
   onSave: (newSettings: AppSettings) => void;
   onClose: () => void;
   onPing: (testSettings: AppSettings) => Promise<any>;
+  onExportSessionJSON?: () => void;
+  onImportSessionJSON?: (jsonData: any) => void;
+  onClearAppCache?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -27,11 +36,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onSave,
   onClose,
   onPing,
+  onExportSessionJSON,
+  onImportSessionJSON,
+  onClearAppCache,
 }) => {
-  const [formData, setFormData] = useState<AppSettings>({ ...settings });
-  const [activeTab, setActiveTab] = useState<'provider' | 'prompts' | 'general'>('provider');
+  const [formData, setFormData] = useState<AppSettings>({
+    ...settings,
+    activeRequirementIds: settings.activeRequirementIds || DEFAULT_APP_REQUIREMENTS.map(r => r.id),
+  });
+  const [activeTab, setActiveTab] = useState<'provider' | 'requirements' | 'prompts' | 'general'>('requirements');
   const [pingStatus, setPingStatus] = useState<any>(null);
   const [isPinging, setIsPinging] = useState(false);
+  const [confirmClearCache, setConfirmClearCache] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleTestPing = async () => {
     setIsPinging(true);
@@ -55,17 +72,65 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     onClose();
   };
 
+  const toggleRequirement = (reqId: string) => {
+    const current = formData.activeRequirementIds || [];
+    if (current.includes(reqId)) {
+      setFormData({
+        ...formData,
+        activeRequirementIds: current.filter(id => id !== reqId),
+      });
+    } else {
+      setFormData({
+        ...formData,
+        activeRequirementIds: [...current, reqId],
+      });
+    }
+  };
+
+  const handleSelectAllRequirements = () => {
+    setFormData({
+      ...formData,
+      activeRequirementIds: DEFAULT_APP_REQUIREMENTS.map(r => r.id),
+    });
+  };
+
+  const handleDeselectAllRequirements = () => {
+    setFormData({
+      ...formData,
+      activeRequirementIds: [],
+    });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        if (onImportSessionJSON) {
+          onImportSessionJSON(json);
+        }
+      } catch (err) {
+        alert('Failed to parse session JSON file. Please ensure it is valid JSON.');
+      }
+    };
+    reader.readAsText(file);
+    if (e.target) e.target.value = '';
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-[#1A1A1A]/40 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white border border-[#1A1A1A] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-[#1A1A1A]">
+      <div className="bg-white border border-[#1A1A1A] w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-[#1A1A1A]">
         {/* Header */}
         <div className="p-6 border-b border-[#E0DED7] flex items-center justify-between bg-[#F9F8F6]">
           <div>
             <h3 className="font-serif text-xl font-bold italic uppercase tracking-tight text-[#1A1A1A]">
-              Settings & Configurations
+              Settings & Architectural Requirements
             </h3>
             <p className="text-[10px] font-mono text-[#888378] uppercase tracking-widest mt-0.5">
-              LLM Engine & Workspace System Directives
+              Configure LLM Engine, Active App Standards & Directives
             </p>
           </div>
           <button
@@ -77,10 +142,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-[#E0DED7] bg-[#F2F0EB] px-6 text-[10px] font-mono uppercase tracking-widest font-bold">
+        <div className="flex border-b border-[#E0DED7] bg-[#F2F0EB] px-6 text-[10px] font-mono uppercase tracking-widest font-bold overflow-x-auto">
+          <button
+            onClick={() => setActiveTab('requirements')}
+            className={`py-3 px-4 border-b-2 flex items-center gap-2 whitespace-nowrap transition-colors ${
+              activeTab === 'requirements'
+                ? 'border-[#A04A30] text-[#A04A30] bg-white'
+                : 'border-transparent text-[#888378] hover:text-[#1A1A1A]'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5" /> App Requirements ({(formData.activeRequirementIds || []).length})
+          </button>
           <button
             onClick={() => setActiveTab('provider')}
-            className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
+            className={`py-3 px-4 border-b-2 flex items-center gap-2 whitespace-nowrap transition-colors ${
               activeTab === 'provider'
                 ? 'border-[#A04A30] text-[#A04A30] bg-white'
                 : 'border-transparent text-[#888378] hover:text-[#1A1A1A]'
@@ -90,7 +165,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('prompts')}
-            className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
+            className={`py-3 px-4 border-b-2 flex items-center gap-2 whitespace-nowrap transition-colors ${
               activeTab === 'prompts'
                 ? 'border-[#A04A30] text-[#A04A30] bg-white'
                 : 'border-transparent text-[#888378] hover:text-[#1A1A1A]'
@@ -100,7 +175,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('general')}
-            className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
+            className={`py-3 px-4 border-b-2 flex items-center gap-2 whitespace-nowrap transition-colors ${
               activeTab === 'general'
                 ? 'border-[#A04A30] text-[#A04A30] bg-white'
                 : 'border-transparent text-[#888378] hover:text-[#1A1A1A]'
@@ -112,6 +187,171 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Body Content */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1 text-[#1A1A1A] text-xs">
+          {/* Tab 1: App Requirements */}
+          {activeTab === 'requirements' && (
+            <div className="space-y-6">
+              <div className="bg-[#F9F8F6] p-4 border border-[#E0DED7] flex items-center justify-between">
+                <div>
+                  <h4 className="font-serif font-bold italic text-sm text-[#1A1A1A]">
+                    Selectable Additional App Requirements
+                  </h4>
+                  <p className="text-[11px] font-sans text-[#888378] mt-0.5">
+                    Toggled architectural rules are automatically injected into prompt optimization runs to enforce explicit implementation standards.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSelectAllRequirements}
+                    className="text-[10px] font-mono uppercase font-bold text-[#A04A30] hover:underline"
+                  >
+                    Select All
+                  </button>
+                  <span className="text-[#888378] text-[10px]">|</span>
+                  <button
+                    type="button"
+                    onClick={handleDeselectAllRequirements}
+                    className="text-[10px] font-mono uppercase font-bold text-[#888378] hover:underline"
+                  >
+                    Deselect All
+                  </button>
+                </div>
+              </div>
+
+              {/* Requirements Checklist Grid */}
+              <div className="grid grid-cols-1 gap-3">
+                {DEFAULT_APP_REQUIREMENTS.map((req) => {
+                  const isChecked = (formData.activeRequirementIds || []).includes(req.id);
+                  return (
+                    <div
+                      key={req.id}
+                      onClick={() => toggleRequirement(req.id)}
+                      className={`p-3.5 border cursor-pointer transition-all flex items-start gap-3 ${
+                        isChecked
+                          ? 'bg-white border-[#1A1A1A] shadow-sm'
+                          : 'bg-[#F9F8F6] border-[#E0DED7] opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        className="mt-0.5 text-[#1A1A1A] focus:outline-none"
+                      >
+                        {isChecked ? (
+                          <CheckSquare className="w-4 h-4 text-[#A04A30]" />
+                        ) : (
+                          <Square className="w-4 h-4 text-[#888378]" />
+                        )}
+                      </button>
+
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-serif font-bold text-xs text-[#1A1A1A]">
+                            {req.name}
+                          </span>
+                          <span className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 bg-[#E0DED7] text-[#1A1A1A] font-bold">
+                            {req.category}
+                          </span>
+                        </div>
+                        <p className="text-[11px] font-sans text-[#888378] leading-snug">
+                          {req.description}
+                        </p>
+                        <div className="text-[10px] font-mono bg-[#F2F0EB] p-2 border border-[#E0DED7] text-[#1A1A1A]/80 mt-1">
+                          <span className="text-[#A04A30] font-bold">Injected Rule: </span>
+                          <span>"{req.promptInstruction}"</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Session JSON Import / Export & Cache Operations */}
+              <div className="border-t border-[#E0DED7] pt-5 space-y-3">
+                <h4 className="font-serif font-bold italic text-sm uppercase tracking-wider text-[#1A1A1A]">
+                  Session JSON & Storage Controls
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Export Session JSON */}
+                  <button
+                    type="button"
+                    onClick={onExportSessionJSON}
+                    className="p-3 border border-[#1A1A1A] bg-[#F9F8F6] hover:bg-[#1A1A1A] hover:text-white transition-colors text-left flex flex-col gap-1"
+                  >
+                    <div className="flex items-center gap-1.5 font-bold font-mono text-[10px] uppercase">
+                      <Download className="w-3.5 h-3.5 text-[#A04A30]" />
+                      <span>Export Session JSON</span>
+                    </div>
+                    <span className="text-[10px] font-sans opacity-70">Save current workspace & history to .json</span>
+                  </button>
+
+                  {/* Import Session JSON */}
+                  <div>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept=".json"
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full p-3 border border-[#1A1A1A] bg-[#F9F8F6] hover:bg-[#1A1A1A] hover:text-white transition-colors text-left flex flex-col gap-1"
+                    >
+                      <div className="flex items-center gap-1.5 font-bold font-mono text-[10px] uppercase">
+                        <Upload className="w-3.5 h-3.5 text-[#A04A30]" />
+                        <span>Import Session JSON</span>
+                      </div>
+                      <span className="text-[10px] font-sans opacity-70">Restore project state from file</span>
+                    </button>
+                  </div>
+
+                  {/* Clear App Cache */}
+                  <div className="flex flex-col">
+                    {!confirmClearCache ? (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmClearCache(true)}
+                        className="p-3 border border-[#A04A30] bg-[#A04A30]/5 hover:bg-[#A04A30] hover:text-white text-[#A04A30] transition-colors text-left flex flex-col gap-1 h-full"
+                      >
+                        <div className="flex items-center gap-1.5 font-bold font-mono text-[10px] uppercase">
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Clear App Cache</span>
+                        </div>
+                        <span className="text-[10px] font-sans opacity-80">Reset to pristine blank slate</span>
+                      </button>
+                    ) : (
+                      <div className="p-2 border border-[#A04A30] bg-[#A04A30] text-white flex flex-col gap-1 text-center justify-between h-full">
+                        <span className="text-[9px] font-mono font-bold uppercase tracking-wider">Confirm Clear Cache?</span>
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setConfirmClearCache(false);
+                              if (onClearAppCache) onClearAppCache();
+                            }}
+                            className="bg-white text-[#A04A30] px-2 py-0.5 text-[9px] font-bold uppercase"
+                          >
+                            Yes, Reset
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmClearCache(false)}
+                            className="border border-white px-2 py-0.5 text-[9px] font-bold uppercase"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'provider' && (
             <div className="space-y-4">
               <div>
