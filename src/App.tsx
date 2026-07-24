@@ -8,6 +8,7 @@ import { SettingsModal } from './components/SettingsModal';
 import { FunctionalSpecModal } from './components/FunctionalSpecModal';
 import { HistoryDrawer } from './components/HistoryDrawer';
 import { ProjectModal } from './components/ProjectModal';
+import { AboutModal } from './components/AboutModal';
 import { ToastContainer, ToastMessage } from './components/Toast';
 
 import { 
@@ -49,6 +50,7 @@ export default function App() {
   const [exportSpecOpen, setExportSpecOpen] = useState<boolean>(false);
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState<boolean>(false);
   const [projectModalOpen, setProjectModalOpen] = useState<boolean>(false);
+  const [aboutModalOpen, setAboutModalOpen] = useState<boolean>(false);
   const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
 
   // Toast Alerts
@@ -319,6 +321,7 @@ export default function App() {
         onOpenSettings={() => setSettingsOpen(true)}
         onOpenExportSpec={() => setExportSpecOpen(true)}
         onToggleHistory={() => setHistoryDrawerOpen(!historyDrawerOpen)}
+        onOpenAbout={() => setAboutModalOpen(true)}
         onPingLLM={() => handlePingLLM()}
         isPinging={isPinging}
       />
@@ -417,6 +420,11 @@ export default function App() {
           onClose={() => setProjectModalOpen(false)}
         />
       )}
+
+      <AboutModal
+        isOpen={aboutModalOpen}
+        onClose={() => setAboutModalOpen(false)}
+      />
 
       {/* Global Toast Container */}
       <ToastContainer toasts={toasts} onDismiss={removeToast} />

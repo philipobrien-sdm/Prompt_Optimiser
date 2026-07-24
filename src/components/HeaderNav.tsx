@@ -11,7 +11,8 @@ import {
   Folder, 
   Pencil,
   RefreshCw,
-  Cpu
+  Cpu,
+  HelpCircle
 } from 'lucide-react';
 import { Project, AppSettings } from '../types';
 
@@ -26,6 +27,7 @@ interface HeaderNavProps {
   onOpenSettings: () => void;
   onOpenExportSpec: () => void;
   onToggleHistory: () => void;
+  onOpenAbout: () => void;
   onPingLLM: () => void;
   isPinging: boolean;
 }
@@ -41,6 +43,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   onOpenSettings,
   onOpenExportSpec,
   onToggleHistory,
+  onOpenAbout,
   onPingLLM,
   isPinging,
 }) => {
@@ -165,7 +168,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
         {/* Export Spec */}
         <button
           onClick={onOpenExportSpec}
-          className="border border-[#1A1A1A] px-4 py-1 text-[10px] uppercase tracking-widest text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-colors font-semibold"
+          className="border border-[#1A1A1A] px-3.5 py-1 text-[10px] uppercase tracking-widest text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-colors font-semibold"
         >
           Export .MD
         </button>
@@ -173,10 +176,20 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
         {/* History */}
         <button
           onClick={onToggleHistory}
-          className="border border-[#1A1A1A] px-4 py-1 text-[10px] uppercase tracking-widest text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-colors font-semibold flex items-center gap-1.5"
+          className="border border-[#1A1A1A] px-3.5 py-1 text-[10px] uppercase tracking-widest text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-colors font-semibold flex items-center gap-1.5"
         >
           <History className="w-3 h-3" />
           <span>History</span>
+        </button>
+
+        {/* About / How it works */}
+        <button
+          onClick={onOpenAbout}
+          className="border border-[#1A1A1A] px-3.5 py-1 text-[10px] uppercase tracking-widest text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-colors font-semibold flex items-center gap-1.5"
+          title="Learn how Prompt Optimizer works under the hood"
+        >
+          <HelpCircle className="w-3 h-3 text-[#A04A30]" />
+          <span>About Engine</span>
         </button>
 
         {/* Settings */}
