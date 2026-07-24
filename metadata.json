@@ -1,0 +1,6 @@
+{
+  "name": "Prompt Optimizer",
+  "description": "Deterministic prompt compiler and session workspace that transforms informal user requests into structured, implementation-ready prompts for AI coding assistants.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
